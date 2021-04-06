@@ -3,19 +3,29 @@ package nfa;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.TreeSet;
 import java.util.HashMap;
 import nfa.Transition;
 
 public class NFA {
-	private HashMap<String, HashMap<Character, ArrayList<String>>> transitionsMap;
 	private HashSet<String> acceptStates;
+	private HashMap<String, TreeSet<String>> epsilonClosure;
+	private HashMap<String, HashMap<Character, ArrayList<String>>> transitionsMap;
 
 	public void init() {
-		transitionsMap = new HashMap<>();
 		acceptStates = new HashSet<>();
+		epsilonClosure = new HashMap<>();
+		transitionsMap = new HashMap<>();
+
 	}
 
 	public NFA(String structure) {
+		dfa(structure);
+	}
+
+	public void dfa(String structure) {
 		init();
 
 		String[] parsedStructure = structure.split("#");
@@ -30,6 +40,8 @@ public class NFA {
 		addTransitions(zeroTransitions, Transition.ZERO);
 		addTransitions(oneTransitions, Transition.ONE);
 		addTransitions(epsilonTransitions, Transition.EPSILON);
+
+		epsilonClosure();
 	}
 
 	public void addTransitions(String[] transitions, Transition transitionType) {
@@ -65,9 +77,40 @@ public class NFA {
 		}
 	}
 
+	public void epsilonClosure() {
+		for (String from : transitionsMap.keySet()) {
+			doEpsilonClosure(from);
+		}
+	}
+
+	public void doEpsilonClosure(String from) {
+		TreeSet<String> visited = new TreeSet<>();
+		Queue<String> queue = new LinkedList<>();
+
+		visited.add(from);
+		queue.add(from);
+
+		while (!queue.isEmpty()) {
+			String currentFrom = queue.poll();
+			ArrayList<String> futureFroms = transitionsMap.get(currentFrom).get(Transition.EPSILON.getName().charAt(0));
+			for (String futureFrom : futureFroms) {
+				if (!visited.contains(futureFrom))
+					queue.add(futureFrom);
+				visited.add(futureFrom);
+			}
+		}
+
+		epsilonClosure.put(from, visited);
+	}
+
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		NFA nfa = new NFA("0,0;1,2;3,3#0,0;0,1;2,3;3,3#1,2#3");
+		NFA nfa = new NFA("0,0;1,2;3,3#0,0;0,1;2,3;3,3#0,1;1,2#3");
+
+		TreeSet<String> visited = nfa.epsilonClosure.get("0");
+
+		for (String s : visited)
+			System.out.println(s);
 	}
 
 }
