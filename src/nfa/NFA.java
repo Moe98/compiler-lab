@@ -67,12 +67,11 @@ public class NFA {
 
 	private void addTransitions(String[] transitions, Transition transitionType) {
 		char transitionAsChar = transitionType.getName().charAt(0);
-//		System.out.println(transitionType.getName());
+
 		for (String transition : transitions) {
 			String[] parsedOneTransition = transition.split(",");
 			String from = parsedOneTransition[0];
 			String to = parsedOneTransition[1];
-//			System.out.println("from: " + from + ", to: " + to);
 
 			if (!transitionsMap.containsKey(from)) {
 				// Check if this can be implemented in a better way.
@@ -88,15 +87,10 @@ public class NFA {
 				HashMap<Character, ArrayList<String>> map = transitionsMap.get(from);
 				ArrayList<String> list = map.get(transitionAsChar);
 				list.add(to);
-//				System.out.println("========" + from + "========");
-//				for (String s : list)
-//					System.out.println(s);
-//				System.out.println("========" + from + "========");
 				map.put(transitionAsChar, list);
 				transitionsMap.put(from, map);
 			}
 
-			// Verify this.
 			if (!transitionsMap.containsKey(to)) {
 				HashMap map = new HashMap<>();
 				map.put(Transition.ZERO.getName().charAt(0), new ArrayList<>());
@@ -105,14 +99,12 @@ public class NFA {
 
 				transitionsMap.put(to, map);
 			}
-			// Verify this.
 		}
 	}
 
 	private void epsilonClosure() {
-		for (String from : transitionsMap.keySet()) {
+		for (String from : transitionsMap.keySet())
 			doEpsilonClosure(from);
-		}
 	}
 
 	private void doEpsilonClosure(String from) {
@@ -133,15 +125,12 @@ public class NFA {
 		}
 
 		epsilonClosure.put(from, visited);
-
-//		System.out.println(epsilonClosure.get(from));
 	}
 
 	private void createDFA() {
 		for (String from : transitionsMap.keySet()) {
 			addDFAHelperTransition(from, Transition.ZERO);
 			addDFAHelperTransition(from, Transition.ONE);
-//			System.out.println(dfaHelper.get(from));
 		}
 
 		addNewStartState();
@@ -150,17 +139,8 @@ public class NFA {
 		while (!newStates.isEmpty()) {
 			addDFATransition(newStates.peek(), Transition.ZERO);
 			addDFATransition(newStates.peek(), Transition.ONE);
-			seenStates.add(newStates.peek());
-			System.out.println(newStates.peek());
-			System.out.println(dfa.get(newStates.peek()));
 			newStates.poll();
 		}
-
-//		for (String s : dfa.keySet()) {
-//			System.out.println(s);
-//			ArrayList<String> list = dfa.get(s);
-//			System.out.println(list.toString());
-//		}
 	}
 
 	private void addDeadState() {
@@ -202,8 +182,7 @@ public class NFA {
 
 	// Test thoroughly.
 	private void addDFATransition(String compoundFrom, Transition transition) {
-		if (seenStates.contains(compoundFrom))
-			return;
+		seenStates.add(newStates.peek());
 
 		String[] from = compoundFrom.split(",");
 		TreeSet<String> statesUnion = new TreeSet<>();
@@ -231,8 +210,10 @@ public class NFA {
 			list.add(outgoingState);
 			dfa.put(compoundFrom, list);
 		}
-		if (!seenStates.contains(outgoingState))
+		if (!seenStates.contains(outgoingState)) {
 			newStates.add(outgoingState);
+			seenStates.add(outgoingState);
+		}
 	}
 
 	private String createCompoundState(TreeSet<String> states) {
@@ -262,17 +243,16 @@ public class NFA {
 	}
 
 	public static void main(String[] args) throws IOException {
-		Scanner sc = new Scanner("src/nfa/test_2.in");
+		Scanner sc = new Scanner("src/nfa/test_1.in");
 		PrintWriter pw = new PrintWriter(System.out);
 
 		String nfaInput = sc.nextLine();
-		nfaInput = "0,0;1,2;3,3#0,0;0,1;2,3;3,3#1,2#3";
 		NFA nfa = new NFA(nfaInput);
 
-//		while (sc.ready())
-//			pw.println(nfa.Run(sc.nextLine()));
-////
-//		pw.flush();
+		while (sc.ready())
+			pw.println(nfa.Run(sc.nextLine()));
+
+		pw.flush();
 
 	}
 
