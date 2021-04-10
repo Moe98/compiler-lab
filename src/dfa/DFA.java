@@ -15,7 +15,7 @@ import java.util.StringTokenizer;
 public class DFA {
 	private HashMap<String, ArrayList<String>> transitions;
 	private HashSet<String> acceptStates;
-	private String START_STATE = "0";
+	private static final String START_STATE = "0";
 
 	public void init() {
 		transitions = new HashMap<>();
