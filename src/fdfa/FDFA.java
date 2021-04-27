@@ -91,7 +91,7 @@ public class FDFA {
     }
 
     public static void main(String[] args) throws IOException {
-        Scanner sc = new Scanner("src/fdfa/test_2.in");
+        Scanner sc = new Scanner("src/fdfa/private_test_6.in");
         PrintWriter pw = new PrintWriter(System.out);
 
         String fdfaInput = sc.nextLine();
