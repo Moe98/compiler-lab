@@ -25,7 +25,7 @@ public class LeftRecursionElimination {
     }
 
     public static void main(String[] args) throws IOException {
-        Scanner sc = new Scanner("src/left_recursion_elimination/test_1.in");
+        Scanner sc = new Scanner("src/left_recursion_elimination/private_test_1.in");
         while (sc.ready())
             new LeftRecursionElimination(sc.nextLine());
     }
@@ -72,7 +72,7 @@ public class LeftRecursionElimination {
 
             final String symbolPrime = symbol + PRIME_SYMBOL;
 
-            if(cfg.containsKey(symbolPrime)) {
+            if (cfg.containsKey(symbolPrime)) {
                 pw.print(DELIMITER);
                 pw.print(symbolPrime);
                 ArrayList<String> symbolPrimeRules = cfg.get(symbolPrime);
