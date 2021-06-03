@@ -8,19 +8,19 @@ public class FirstFollow {
     final private static String EPSILON = "e";
     final private static String DELIMITER = ";";
     final private static String TOKEN_DELIMITER = ",";
+    final private static String START_SYMBOL = "S";
     //TODO: Make this non-static.
     private static boolean hasChanged;
     private LinkedHashMap<String, ArrayList<String>> cfg;
     private LinkedHashMap<String, TreeSet<String>> first;
     private LinkedHashMap<String, TreeSet<String>> follow;
-    private HashSet<String> hasEpsilon;
 
     public FirstFollow(String input) {
         init();
 
         readInput(input);
 
-        initFirst();
+        initFirstAndFollow();
 
         computeFirst();
 
@@ -45,9 +45,6 @@ public class FirstFollow {
 
             ArrayList<String> rules = new ArrayList<>(Arrays.asList(symbolRule).subList(1, symbolRule.length));
 
-            if (rules.stream().anyMatch(rule -> rule.equals(EPSILON)))
-                hasEpsilon.add(symbol);
-
             cfg.put(symbol, rules);
         }
     }
@@ -55,19 +52,21 @@ public class FirstFollow {
     private void init() {
         cfg = new LinkedHashMap<>();
         follow = new LinkedHashMap<>();
-        hasEpsilon = new HashSet<>();
     }
 
-    private void initFirst() {
+    private void initFirstAndFollow() {
         first = new LinkedHashMap<>();
 
         cfg.forEach((symbol, rules) -> {
             first.put(symbol, new TreeSet<>());
-            rules.forEach(rule -> {
-                Stream.of(rule.split((""))).
-                        filter(beta -> !cfg.containsKey(beta)).
-                        forEach(beta -> first.put(beta, new TreeSet<>(List.of(beta))));
-            });
+            follow.put(symbol, new TreeSet<>());
+
+            if (symbol.equals(START_SYMBOL))
+                follow.get(symbol).add("$");
+
+            rules.forEach(rule -> Stream.of(rule.split((""))).
+                    filter(beta -> !cfg.containsKey(beta)).
+                    forEach(beta -> first.put(beta, new TreeSet<>(List.of(beta)))));
         });
     }
 
@@ -100,7 +99,7 @@ public class FirstFollow {
                                 areAllEpsilon = false;
                         }
                         if (i == 0 || areAllEpsilon) {
-                            if (isNotSubset(String.valueOf(rule.charAt(i)), symbol)) {
+                            if (isNotSubset(first.get(String.valueOf(rule.charAt(i))), first.get(symbol))) {
                                 for (String bSymbol : first.get(String.valueOf(rule.charAt(i)))) {
                                     if (!bSymbol.equals(EPSILON))
                                         first.get(symbol).add(bSymbol);
@@ -114,9 +113,9 @@ public class FirstFollow {
         }
     }
 
-    private boolean isNotSubset(String b, String a) {
-        for (String bSymbol : first.get(b)) {
-            if (!bSymbol.equals(EPSILON) && !first.get(a).contains(bSymbol))
+    private boolean isNotSubset(TreeSet<String> b, TreeSet<String> a) {
+        for (String bSymbol : b) {
+            if (!bSymbol.equals(EPSILON) && !a.contains(bSymbol))
                 return true;
         }
 
@@ -124,25 +123,82 @@ public class FirstFollow {
     }
 
     private void computeFollow() {
+        hasChanged = true;
 
+        while (hasChanged) {
+            hasChanged = false;
+
+            cfg.forEach((symbol, rules) -> {
+                for (String rule : rules) {
+                    for (int i = 0; i < rule.length(); i++) {
+                        final String b = String.valueOf(rule.charAt(i));
+                        // Terminal.
+                        if (!cfg.containsKey(String.valueOf(rule.charAt(i))))
+                            continue;
+
+                        boolean areAllEpsilon = true;
+
+                        for (int j = i + 1; j < rule.length() && areAllEpsilon; j++) {
+                            final String beta = String.valueOf(rule.charAt(j));
+                            if (isNotSubset(first.get(beta), follow.get(b))) {
+                                for (String bSymbol : first.get(beta)) {
+                                    if (!bSymbol.equals(EPSILON))
+                                        follow.get(b).add(bSymbol);
+                                }
+                                hasChanged = true;
+                            }
+
+                            areAllEpsilon = first.get(beta).contains(EPSILON);
+                        }
+
+                        if (areAllEpsilon) {
+                            if (isNotSubset(follow.get(symbol), follow.get(b))) {
+                                for (String bSymbol : follow.get(symbol))
+                                    follow.get(b).add(bSymbol);
+                                hasChanged = true;
+                            }
+                        }
+
+                    }
+                }
+            });
+        }
     }
 
     private void printOutput() {
         PrintWriter pw = new PrintWriter(System.out);
-        StringBuilder sb = new StringBuilder();
+        StringBuilder firstOutput = new StringBuilder();
+        StringBuilder followOutput = new StringBuilder();
 
         for (String symbol : cfg.keySet()) {
-            sb.append(symbol).append(TOKEN_DELIMITER);
+            firstOutput.append(symbol).append(TOKEN_DELIMITER);
+            followOutput.append(symbol).append(TOKEN_DELIMITER);
 
             TreeSet<String> firsts = first.get(symbol);
+            TreeSet<String> follows = follow.get(symbol);
 
             for (String first : firsts)
-                sb.append(first);
+                firstOutput.append(first);
 
-            sb.append(DELIMITER);
+            boolean hasDollarSign = false;
+
+            for (String follow : follows) {
+                if (follow.equals("$")) {
+                    hasDollarSign = true;
+                    continue;
+                }
+                followOutput.append(follow);
+            }
+
+            if (hasDollarSign)
+                followOutput.append("$");
+
+            firstOutput.append(DELIMITER);
+            followOutput.append(DELIMITER);
         }
 
-        pw.println(sb.substring(0, sb.length() - 1));
+        pw.printf("First: %s\n", firstOutput.substring(0, firstOutput.length() - 1));
+        pw.printf("Follow: %s\n", followOutput.substring(0, followOutput.length() - 1));
         pw.flush();
     }
 
