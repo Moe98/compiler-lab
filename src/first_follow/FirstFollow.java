@@ -69,14 +69,9 @@ public class FirstFollow {
                         forEach(beta -> first.put(beta, new TreeSet<>(List.of(beta))));
             });
         });
-
-//        first.forEach((symbol, firsts) -> {
-//            System.out.println(symbol + " " + firsts);
-//        });
     }
 
     private void computeFirst() {
-//        boolean hasChanged = true;
         hasChanged = true;
 
         while (hasChanged) {
@@ -85,17 +80,19 @@ public class FirstFollow {
             cfg.forEach((symbol, rules) -> {
                 for (String rule : rules) {
                     boolean areAllEpsilon = true;
+
                     for (char beta : rule.toCharArray()) {
                         if (!first.get(String.valueOf(beta)).contains(EPSILON))
                             areAllEpsilon = false;
                     }
+
                     if (areAllEpsilon) {
                         if (!first.get(symbol).contains(EPSILON)) {
                             first.get(symbol).add(EPSILON);
-//                            System.out.println("changed in the if");
                             hasChanged = true;
                         }
-                    } //else {
+                    }
+
                     for (int i = 0; i < rule.length(); i++) {
                         areAllEpsilon = true;
                         for (int j = 0; j < i; j++) {
@@ -108,24 +105,16 @@ public class FirstFollow {
                                     if (!bSymbol.equals(EPSILON))
                                         first.get(symbol).add(bSymbol);
                                 }
-//                                    System.out.println("changed in the else");
                                 hasChanged = true;
                             }
                         }
                     }
                 }
-                //}
             });
-
-//            cfg.forEach((symbol, firsts) -> {
-//                System.out.println(symbol + " " + first.get(symbol));
-//            });
         }
     }
 
     private boolean isNotSubset(String b, String a) {
-        // something in |b| is not in |a|
-
         for (String bSymbol : first.get(b)) {
             if (!bSymbol.equals(EPSILON) && !first.get(a).contains(bSymbol))
                 return true;
@@ -139,16 +128,16 @@ public class FirstFollow {
     }
 
     private void printOutput() {
-        // Change First&Follow ArrayLists to TreeSets to have them ordered?
         PrintWriter pw = new PrintWriter(System.out);
         StringBuilder sb = new StringBuilder();
+
         for (String symbol : cfg.keySet()) {
-            sb.append(symbol);
+            sb.append(symbol).append(TOKEN_DELIMITER);
 
             TreeSet<String> firsts = first.get(symbol);
 
             for (String first : firsts)
-                sb.append(TOKEN_DELIMITER).append(first);
+                sb.append(first);
 
             sb.append(DELIMITER);
         }
