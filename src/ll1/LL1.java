@@ -1,6 +1,6 @@
 package ll1;
 
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -24,14 +24,22 @@ public class LL1 {
         setTerminals();
 
         constructLL1Table();
-
-        printOutput();
     }
 
-    public static void main(String[] args) {
-        LL1 ll1 = new LL1("S,iST,e;T,cS,a#S,i,e;T,c,a#S,ca$;T,ca$");
-        ll1.parse("iia");
-        ll1.parse("iiac");
+    public static void main(String[] args) throws IOException {
+        Scanner sc = new Scanner("src/ll1/test_1.in");
+        String input = "";
+
+        while(sc.ready()) {
+            String line = sc.nextLine();
+
+            if(line.contains(";")) {
+                input = line;
+                continue;
+            }
+
+            new LL1(input).parse(line);
+        }
     }
 
     private void setTerminals() {
@@ -123,59 +131,6 @@ public class LL1 {
         });
     }
 
-    private void printOutput() {
-    }
-
-    private void parse2(String input) {
-//        PrintWriter pw = new PrintWriter(System.out);
-//
-//        pda = new Stack<>();
-//
-//        //pda.push("$");
-//        pda.push(START_SYMBOL);
-//
-//        for(int i = 0;i<input.length();) {
-//            pw.printf("%s,",pdaToString());
-//
-//            String a = String.valueOf(input.charAt(i));
-//
-//            if(pda.isEmpty()) {
-//                pw.println("ERROR");
-//                pw.flush();
-//                return;
-//            }
-//
-//            if(pda.peek().equals(a)) {
-//                i++;
-//                pda.pop();
-//                continue;
-//            }
-//
-//            if(!ll1_parsing_table.get(a).containsKey(pda.peek())) {
-//                pw.println("ERROR");
-//                pw.flush();
-//                return;
-//            }
-//
-//            String rule = ll1_parsing_table.get(a).get(pda.pop());
-//
-//            if(rule.equals(EPSILON))
-//                continue;
-//
-//            for(int j = rule.length() - 1; j>=0; j--)
-//                pda.push(String.valueOf(rule.charAt(j)));
-//        }
-//
-//        if(!pda.isEmpty()) {
-//            pw.println("ERROR");
-//            pw.flush();
-//            return;
-//        }
-//
-//        pw.println();
-//        pw.flush();
-    }
-
     private void parse(String input) {
         // Don't print during the steps where a terminal cancels out a terminal.
         PrintWriter pw = new PrintWriter(System.out);
@@ -190,8 +145,10 @@ public class LL1 {
 
         while (true) {
             // What if the input finishes and the pda still has stuff?
-            if (inputIndex == input.length() - 1 && pdaIndex == pda.size())
+            if (inputIndex == input.length() - 1 && pdaIndex == pda.size()) {
+                pw.println();
                 break;
+            }
 
             if (pdaIndex >= pda.size() || inputIndex >= input.length()) {
                 pw.println(",ERROR");
@@ -225,13 +182,50 @@ public class LL1 {
         pw.flush();
     }
 
-    private String pdaToString() {
-        StringBuilder output = new StringBuilder();
-        Stack<String> stack = (Stack) pda.clone();
+    static class Scanner {
+        StringTokenizer st;
+        BufferedReader br;
 
-        for (String s : stack)
-            output.append(s);
+        public Scanner(InputStream system) {
+            br = new BufferedReader(new InputStreamReader(system));
+        }
 
-        return output.reverse().toString();
+        Scanner(String fileName) throws FileNotFoundException {
+            br = new BufferedReader(new FileReader(fileName));
+        }
+
+        public String next() throws IOException {
+            while (st == null || !st.hasMoreTokens())
+                st = new StringTokenizer(br.readLine());
+            return st.nextToken();
+        }
+
+        public String nextLine() throws IOException {
+            return br.readLine();
+        }
+
+        public int nextInt() throws IOException {
+            return Integer.parseInt(next());
+        }
+
+        public double nextDouble() throws IOException {
+            return Double.parseDouble(next());
+        }
+
+        public char nextChar() throws IOException {
+            return next().charAt(0);
+        }
+
+        public Long nextLong() throws IOException {
+            return Long.parseLong(next());
+        }
+
+        public boolean ready() throws IOException {
+            return br.ready();
+        }
+
+        public void waitForInput() throws InterruptedException {
+            Thread.sleep(4000);
+        }
     }
 }
