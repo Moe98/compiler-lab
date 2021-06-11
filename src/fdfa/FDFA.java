@@ -4,16 +4,10 @@ import java.io.*;
 import java.util.*;
 
 public class FDFA {
+    private static final String START_STATE = "0";
     private HashMap<String, ArrayList<String>> transitions;
     private HashMap<String, String> actions;
     private HashSet<String> acceptStates;
-    private static final String START_STATE = "0";
-
-    private void init() {
-        transitions = new HashMap<>();
-        actions = new HashMap<>();
-        acceptStates = new HashSet<>();
-    }
 
     public FDFA(String structure) {
         init();
@@ -38,6 +32,25 @@ public class FDFA {
 
             transitions.put(node, outgoingStates);
         }
+    }
+
+    public static void main(String[] args) throws IOException {
+        Scanner sc = new Scanner("src/fdfa/private_test_6.in");
+        PrintWriter pw = new PrintWriter(System.out);
+
+        String fdfaInput = sc.nextLine();
+        FDFA fdfa = new FDFA(fdfaInput);
+
+        while (sc.ready())
+            pw.println(fdfa.Run(sc.nextLine()));
+
+        pw.flush();
+    }
+
+    private void init() {
+        transitions = new HashMap<>();
+        actions = new HashMap<>();
+        acceptStates = new HashSet<>();
     }
 
     public String Run(String input) {
@@ -90,52 +103,6 @@ public class FDFA {
         return fallbackStack;
     }
 
-    public static void main(String[] args) throws IOException {
-        Scanner sc = new Scanner("src/fdfa/private_test_6.in");
-        PrintWriter pw = new PrintWriter(System.out);
-
-        String fdfaInput = sc.nextLine();
-        FDFA fdfa = new FDFA(fdfaInput);
-
-        while (sc.ready())
-            pw.println(fdfa.Run(sc.nextLine()));
-
-        pw.flush();
-    }
-
-    public class FallbackState {
-        private boolean isAccepted;
-        private char value;
-        private String state;
-
-        public FallbackState(boolean isAccepted, char value, String state) {
-            this.isAccepted = isAccepted;
-            this.value = value;
-            this.state = state;
-        }
-
-        public boolean isAccepted() {
-            return isAccepted;
-        }
-
-        public char getValue() {
-            return value;
-        }
-
-        public String getState() {
-            return state;
-        }
-
-        @Override
-        public String toString() {
-            return "FallbackState{" +
-                    "isAccepted=" + isAccepted +
-                    ", value=" + value +
-                    ", state='" + state + '\'' +
-                    '}';
-        }
-    }
-
     static class Scanner {
         StringTokenizer st;
         BufferedReader br;
@@ -180,6 +147,39 @@ public class FDFA {
 
         public void waitForInput() throws InterruptedException {
             Thread.sleep(4000);
+        }
+    }
+
+    public class FallbackState {
+        private boolean isAccepted;
+        private char value;
+        private String state;
+
+        public FallbackState(boolean isAccepted, char value, String state) {
+            this.isAccepted = isAccepted;
+            this.value = value;
+            this.state = state;
+        }
+
+        public boolean isAccepted() {
+            return isAccepted;
+        }
+
+        public char getValue() {
+            return value;
+        }
+
+        public String getState() {
+            return state;
+        }
+
+        @Override
+        public String toString() {
+            return "FallbackState{" +
+                    "isAccepted=" + isAccepted +
+                    ", value=" + value +
+                    ", state='" + state + '\'' +
+                    '}';
         }
     }
 }

@@ -1,7 +1,7 @@
 package nfa;
 
 public enum Transition {
-	ZERO("0"),
+    ZERO("0"),
     ONE("1"),
     EPSILON("e");
 
