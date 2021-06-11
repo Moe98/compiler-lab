@@ -30,10 +30,10 @@ public class LL1 {
         Scanner sc = new Scanner("src/ll1/test_1.in");
         String input = "";
 
-        while(sc.ready()) {
+        while (sc.ready()) {
             String line = sc.nextLine();
 
-            if(line.contains(";")) {
+            if (line.contains(";")) {
                 input = line;
                 continue;
             }
